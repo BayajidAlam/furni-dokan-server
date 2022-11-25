@@ -56,6 +56,21 @@ async function run(){
       res.send(result)
     })
 
+    // delete a user 
+    app.delete('/deleteuser',async(req,res)=>{
+      const userEmail = req.query.email
+      const query = {email: userEmail}
+      const deleteResult = await usersCollection.deleteOne(query)
+      res.send(deleteResult)
+    })
+
+    // get all buyer 
+    app.get('/allbuyers',async(req,res)=>{
+      const userRole = req.query.role 
+      const query = {role: userRole}
+      const result = await usersCollection.find(query).toArray()
+      res.send(result)
+    })
   }
   finally{
    
