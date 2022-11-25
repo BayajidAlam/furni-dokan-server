@@ -47,6 +47,15 @@ async function run(){
       const result = await usersCollection.insertOne(user)
       res.send(result)
     })
+
+    // load all sellers data 
+    app.get('/allSellers',async(req,res)=>{
+      const userRole = req.query.role 
+      const query = {role:userRole}
+      const result = await usersCollection.find(query).toArray()
+      res.send(result)
+    })
+
   }
   finally{
    
