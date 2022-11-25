@@ -71,6 +71,16 @@ async function run(){
       const result = await usersCollection.find(query).toArray()
       res.send(result)
     })
+
+    // post a product to singleCategory 
+    app.post('/category',async(req,res)=>{
+      const newProduct = req.body
+      const result = await singleCategoryCollection.insertOne(newProduct)
+      console.log(result)
+      res.send(result)
+    })
+
+    
   }
   finally{
    
