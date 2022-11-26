@@ -194,11 +194,28 @@ async function run(){
   app.get('/advertisement',async(req,res)=>{
     const query = { addState : 'advertised'}
     const result = await singleCategoryCollection.find(query).toArray()
-    console.log(result);
     res.send(result)
   })
 
+  // get all buyer from db 
+  app.get('/buyers',async(req,res)=>{
+    const email = req.query.email 
+    const query = {
+      sellerEmail: email
+    }
+    const buyers = await bookingsCollection.find(query).toArray()
+    res.send(buyers)
+  })
 
+  // get all of my order 
+  app.get('/orders',async(req,res)=>{
+    const email = req.query.email 
+    const query = {
+      buyerEmail : email
+    }
+    const orders = await bookingsCollection.find(query).toArray()
+    res.send(orders)
+  })
 
   }
   finally{
