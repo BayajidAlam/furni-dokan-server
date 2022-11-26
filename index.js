@@ -1,7 +1,9 @@
 const express = require("express");
 const cors = require("cors");
 const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
+var jwt = require('jsonwebtoken');
 require('dotenv').config()
+
 const app = express();
 const port = process.env.PORT || 5000;
 
@@ -16,6 +18,25 @@ const client = new MongoClient(uri, {
   serverApi: ServerApiVersion.v1,
 });
 
+// verify client token and permit to process 
+function verifyJWT(req,res,next){
+  const authHeader = req.headers.authorization
+  if(!authHeader){
+    return res.status(403).send('unauthorize access')
+  }
+
+  const token = authHeader.split(' ')[1]
+
+  jwt.verify(token,process.env.SECRET_TOKEN,function(err,decoded){
+    if(err){
+      return res.status(403).send({message:'forbidden access'})
+    }
+    req.decoded = decoded;
+    next()
+  })
+}
+ 
+// main function 
 async function run(){
 
   try{
@@ -26,14 +47,50 @@ async function run(){
     const usersCollection = client.db('furniDokan').collection('users')
     const bookingsCollection = client.db('furniDokan').collection('bookings')
 
+    // generate jWt and send to client
+    app.get('/jwt',async(req,res)=>{
+      const email = req.query.email
+      const query = { email : email }
+      const result = await usersCollection.findOne(query)
+      if(result){
+        const token = jwt.sign({email},process.env.SECRET_TOKEN)
+        return res.send({accessToken:token})
+      }
+      res.status(403).send({accessToken:'unauthorize access'})
+    })
+
+    // chcek user as a admin  
+    app.get('/user/admin/:email',async(req,res)=>{
+      const email = req.params.email 
+      const query = { email } 
+      const user = await usersCollection.findOne(query)
+      res.send({isAdmin:user?.role === 'admin'})
+    })
+
+    // check seller 
+    app.get('/user/seller/:email',async(req,res)=>{
+      const email = req.params.email 
+      const query = { email }
+      const seller = await usersCollection.findOne(query)
+      res.send({isSeller:seller?.role === 'seller'})
+    })
+
+    // check user
+    app.get('/user/buyer/:email',async(req,res)=>{
+      const email = req.params.email 
+      const query = { email }
+      const buyer = await usersCollection.findOne(query)
+      res.send({isBuyer:buyer?.role === 'buyer'})
+    })
+
     // get all categorys 
-    app.get('/categorys',async(req,res)=>{
+    app.get('/categorys',verifyJWT,async(req,res)=>{
       const query = {}
       const categorys = await categorysCollection.find(query).toArray()
       res.send(categorys)
     })
 
-    // get all data of a query 
+    // get all data of a category
     app.get('/category',async(req,res)=>{
       const name = req.query.name
       const query = {catName:name}
@@ -49,12 +106,19 @@ async function run(){
       res.send(result)
     })
 
-    // get a user from db 
     app.get('/user',async(req,res)=>{
       const email = req.query.email 
-      const query = { email : email }
-      const result = await usersCollection.findOne(query)
-      res.send(result)
+      const query = { email: email}
+      const user = await usersCollection.find(query).toArray()
+      res.send(user)
+    })
+    // get a user from db 
+    app.get('/getUser',verifyJWT,async(req,res)=>{
+      const userEmail = req.query.email
+      const query = {email:userEmail}
+      const foundUser = await usersCollection.findOne(query)
+      res.send(foundUser)
+      console.log(foundUser)
     })
 
     // delete a user 
