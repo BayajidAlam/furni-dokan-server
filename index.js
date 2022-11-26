@@ -49,11 +49,11 @@ async function run(){
       res.send(result)
     })
 
-    // load all sellers data 
-    app.get('/allSellers',async(req,res)=>{
-      const userRole = req.query.role 
-      const query = {role:userRole}
-      const result = await usersCollection.find(query).toArray()
+    // get a user from db 
+    app.get('/user',async(req,res)=>{
+      const email = req.query.email 
+      const query = { email : email }
+      const result = await usersCollection.findOne(query)
       res.send(result)
     })
 
@@ -63,6 +63,14 @@ async function run(){
       const query = {email: userEmail}
       const deleteResult = await usersCollection.deleteOne(query)
       res.send(deleteResult)
+    })
+
+    // load all sellers data 
+    app.get('/allSellers',async(req,res)=>{
+      const userRole = req.query.role 
+      const query = {role:userRole}
+      const result = await usersCollection.find(query).toArray()
+      res.send(result)
     })
 
     // get all buyer 
