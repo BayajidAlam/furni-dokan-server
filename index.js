@@ -24,6 +24,7 @@ async function run(){
     const categorysCollection = client.db('furniDokan').collection('categorys')
     const singleCategoryCollection = client.db('furniDokan').collection('singleCategory')
     const usersCollection = client.db('furniDokan').collection('users')
+    const bookingsCollection = client.db('furniDokan').collection('bookings')
 
     // get all categorys 
     app.get('/categorys',async(req,res)=>{
@@ -94,6 +95,14 @@ async function run(){
     const result = await singleCategoryCollection.deleteOne(query)
     res.send(result)
    })
+
+  //  sava a booking to db 
+   app.post('/booking',async(req,res)=>{
+    const booking = req.body
+    const result = await bookingsCollection.insertOne(booking)
+    res.send(result)
+   })
+
   }
   finally{
    
