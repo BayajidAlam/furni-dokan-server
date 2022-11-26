@@ -175,6 +175,31 @@ async function run(){
     res.send(result)
    })
 
+  // update a product to advertise 
+   app.put('/advertisement/:id',async(req,res)=>{
+    const id = req.params.id 
+    const filter = {_id:ObjectId(id)}
+    const options = {upsert: true}
+    const recevedDoc = req.body
+    const updatedDoc = {
+      $set: {
+        addState: recevedDoc.state
+      }
+    }
+    const result = await singleCategoryCollection.updateOne(filter,updatedDoc,options)
+    res.send(result)
+   })
+
+  //  get all advertisemet data 
+  app.get('/advertisement',async(req,res)=>{
+    const query = { addState : 'advertised'}
+    const result = await singleCategoryCollection.find(query).toArray()
+    console.log(result);
+    res.send(result)
+  })
+
+
+
   }
   finally{
    
