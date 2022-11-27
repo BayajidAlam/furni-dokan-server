@@ -84,7 +84,7 @@ async function run(){
     })
 
     // get all categorys 
-    app.get('/categorys',verifyJWT,async(req,res)=>{
+    app.get('/categorys',async(req,res)=>{
       const query = {}
       const categorys = await categorysCollection.find(query).toArray()
       res.send(categorys)
@@ -106,15 +106,18 @@ async function run(){
       res.send(result)
     })
 
+    // get a user from db 
     app.get('/user',async(req,res)=>{
       const email = req.query.email 
       const query = { email: email}
       const user = await usersCollection.find(query).toArray()
       res.send(user)
     })
+
     // get a user from db 
     app.get('/getUser',verifyJWT,async(req,res)=>{
       const userEmail = req.query.email
+      console.log(userEmail);
       const query = {email:userEmail}
       const foundUser = await usersCollection.findOne(query)
       res.send(foundUser)
@@ -174,6 +177,54 @@ async function run(){
     const result = await bookingsCollection.insertOne(booking)
     res.send(result)
    })
+
+  //  verify a seller 
+  app.put('/updateSeller/:id',async(req,res)=>{
+    // const id = req.params.id 
+    // const filter = {_id:ObjectId(id)}
+    // const options = {upsert:true}
+    // const recevedDoc = req.body
+    // const updateDoc = {
+    //   $set: {
+    //     sellerState : recevedDoc.sellerState
+    //   }
+    // }
+    // const result = await singleCategoryCollection.updateOne(filter,updateDoc,options)
+    // res.send(result)
+  })
+
+  // report a seller 
+  app.put('/report/:id',async(req,res)=>{
+    const id = req.params.id
+    const filter = {_id:ObjectId(id)}
+    const recevedDoc = req.body;
+    const options = {upsert:true}
+    if(recevedDoc.productReportState === 'not reported'){
+      const updatedDoc = {
+        $set: {
+          reportState: 'reported'
+        }
+      }
+    const result = await singleCategoryCollection.updateOne(filter,updatedDoc,options)
+    res.send(result)
+    console.log(result);
+    } 
+  })
+
+   // set as Booked
+  app.put('/setbooked/:id',async(req,res)=>{
+     const id = req.params.id 
+     const body = req.body
+     const filter = {_id:ObjectId(id)}
+     const options = { upsert: true } 
+     const updatedDoc = {
+        $set: {
+          salesStatus:body.salesStatus
+        }
+     }
+     const result = await singleCategoryCollection.updateOne(filter,updatedDoc,options)
+     res.send(result)
+  })
 
   // update a product to advertise 
    app.put('/advertisement/:id',async(req,res)=>{
