@@ -95,6 +95,7 @@ async function run(){
       res.status(403).send({accessToken:'unauthorize access'})
     })
 
+  
     // chcek user as a admin  
     app.get('/user/admin/:email',async(req,res)=>{
       const email = req.params.email 
@@ -156,7 +157,6 @@ async function run(){
       const query = {email:userEmail}
       const foundUser = await usersCollection.findOne(query)
       res.send(foundUser)
-      console.log(foundUser)
     })
 
     // delete a user 
