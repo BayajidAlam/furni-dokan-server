@@ -179,18 +179,33 @@ async function run(){
    })
 
   //  verify a seller 
-  app.put('/updateSeller/:id',async(req,res)=>{
-    // const id = req.params.id 
-    // const filter = {_id:ObjectId(id)}
-    // const options = {upsert:true}
-    // const recevedDoc = req.body
-    // const updateDoc = {
-    //   $set: {
-    //     sellerState : recevedDoc.sellerState
-    //   }
-    // }
-    // const result = await singleCategoryCollection.updateOne(filter,updateDoc,options)
-    // res.send(result)
+  app.put('/updateSeller/:email',async(req,res)=>{
+    const email = req.params.email 
+    const filter = {email:email}
+    const options = {upsert:true}
+    const recevedDoc = req.body
+    const updateDoc = {
+      $set: {
+        sellerState : recevedDoc.sellerState
+      }
+    }
+    const result = await singleCategoryCollection.updateOne(filter,updateDoc,options)
+    res.send(result)
+  })
+
+  //  change user state as a seller 
+  app.put('/updateUser/:email',async(req,res)=>{
+    const email = req.params.email 
+    const filter = {email:email}
+    const options = {upsert:true}
+    const recevedDoc = req.body
+    const updateDoc = {
+      $set: {
+        sellerState : recevedDoc.sellerState
+      }
+    }
+    const result = await usersCollection.updateOne(filter,updateDoc,options)
+    res.send(result)
   })
 
   // report a seller 
