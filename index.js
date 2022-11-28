@@ -211,6 +211,24 @@ async function run(){
     } 
   })
 
+  // get all reported item 
+  app.get('/reported',async(req,res)=>{
+    const query = {
+      reportState: 'reported'
+    }
+    const reportItem = await singleCategoryCollection.find(query).toArray()
+    res.send(reportItem)
+  })
+
+  // delete a reported item 
+  app.delete('/reported/:id',async(req,res)=>{
+    const id = req.params.id 
+    const query = { _id:ObjectId(id)}
+    const result = await singleCategoryCollection.deleteOne(query)
+    res.send(result)
+    console.log(result)
+  })
+
    // set as Booked
   app.put('/setbooked/:id',async(req,res)=>{
      const id = req.params.id 
