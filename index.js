@@ -3,6 +3,7 @@ const cors = require("cors");
 const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
 var jwt = require('jsonwebtoken');
 require('dotenv').config()
+const stripe = require("stripe")(process.env.STRIPE_SECRET)
 
 const app = express();
 const port = process.env.PORT || 5000;
@@ -46,6 +47,41 @@ async function run(){
     const singleCategoryCollection = client.db('furniDokan').collection('singleCategory')
     const usersCollection = client.db('furniDokan').collection('users')
     const bookingsCollection = client.db('furniDokan').collection('bookings')
+    const paymentsCollection = client.db('furniDokan').collection('payments')
+
+    // payment 
+    app.post('/create-payment-intent',async(req,res)=>{
+      const payment = req.body 
+      const price = payment.price
+      const amount = price * 100 
+
+      const paymentIntent = await stripe.paymentIntents.create({
+        currency: 'usd',
+        amount: amount,
+        'payment_method_types':[
+          'card'
+        ]
+      })
+      res.send({
+        clientSecret:paymentIntent.client_secret,
+      })
+    })
+
+    // save payments to db 
+    app.post('/payments',async(req,res)=>{
+      const payment = req.body
+      const result = await paymentsCollection.insertOne(payment)
+      const id = payment.bookingId
+      const filter = {_id:ObjectId(id)}
+      const updatedDoc = {
+        $set: {
+          paid: true,
+          transactionId:payment.transactionId
+        }
+      }
+      const updatedResult = await bookingsCollection.updateOne(filter,updatedDoc)
+      res.send(result)
+    })
 
     // generate jWt and send to client
     app.get('/jwt',async(req,res)=>{
@@ -94,7 +130,6 @@ async function run(){
     app.get('/category',async(req,res)=>{
       const name = req.query.name
       const query = {catName:name}
-      console.log(name)
       const data = await singleCategoryCollection.find(query).toArray()
       res.send(data)
     })
@@ -152,7 +187,6 @@ async function run(){
     app.post('/category',async(req,res)=>{
       const newProduct = req.body
       const result = await singleCategoryCollection.insertOne(newProduct)
-      console.log(result)
       res.send(result)
     })
     // get all product for a email 
